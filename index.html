@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Campus Hub</title>
+    <style>
+        /* --- CSS STYLES --- */
+        :root {
+            --primary-blue: #003366;
+            --accent-blue: #007bff;
+            --light-bg: #f0f4f8;
+            --white: #ffffff;
+            --text-dark: #333;
+        }
+
+        * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        
+        body { margin: 0; background-color: var(--light-bg); color: var(--text-dark); }
+
+        /* Use this to hide pages */
+        .hidden { display: none !important; }
+
+        /* Login Screen */
+        .auth-screen {
+            height: 100vh; display: flex; justify-content: center; align-items: center;
+            background: linear-gradient(135deg, var(--primary-blue), var(--accent-blue));
+        }
+
+        .login-box {
+            background: var(--white); padding: 40px; border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2); width: 350px; text-align: center;
+        }
+
+        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 6px; }
+
+        .btn-main {
+            background: var(--primary-blue); color: white; border: none;
+            padding: 12px; border-radius: 6px; width: 100%; cursor: pointer; font-weight: bold;
+        }
+
+        /* Dashboard */
+        .navbar {
+            background: var(--primary-blue); color: white; padding: 15px 5%;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+
+        .grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px; padding: 40px 10%; max-width: 1200px; margin: auto;
+        }
+
+        .card {
+            background: var(--white); padding: 30px; border-radius: 15px;
+            text-align: center; cursor: pointer; transition: 0.3s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-top: 5px solid var(--accent-blue);
+        }
+
+        .card:hover { transform: translateY(-5px); box-shadow: 0 8px 15px rgba(0,0,0,0.1); }
+        .card h3 { margin: 10px 0 5px 0; color: var(--primary-blue); }
+
+        /* Modals (The "New Pages") */
+        .modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: var(--white); padding: 30px; border-radius: 15px;
+            width: 90%; max-width: 600px; max-height: 80vh; overflow-y: auto; position: relative;
+        }
+
+        .close-btn { position: absolute; top: 15px; right: 20px; font-size: 24px; cursor: pointer; }
+
+        /* Features */
+        .item-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; }
+        .map-placeholder { background: #e9ecef; height: 300px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #666; }
+        .cart-footer { margin-top: 20px; padding-top: 10px; border-top: 2px solid var(--primary-blue); text-align: right; }
+    </style>
+</head>
+<body>
+
+    <div id="login-page" class="auth-screen">
+        <div class="login-box">
+            <h2 style="color: var(--primary-blue)">Campus Hub Login</h2>
+            <p>Welcome to Smart Services</p>
+            <input type="email" id="email" placeholder="Student Email" required>
+            <input type="password" id="password" placeholder="Password" required>
+            <button class="btn-main" onclick="handleLogin()">Sign In</button>
+        </div>
+    </div>
+
+    <div id="dashboard" class="hidden">
+        <nav class="navbar">
+            <h2 style="margin:0">CampusHub</h2>
+            <div style="cursor:pointer" onclick="openModal('cart-modal')">🛒 Cart (<span id="cart-count">0</span>)</div>
+        </nav>
+
+        <div class="grid">
+            <div class="card" onclick="openModal('canteen-modal')"><h3>🍱 Canteen</h3><p>Fast food & Beverages</p></div>
+            <div class="card" onclick="openModal('issue-modal')"><h3>🛠️ Report Issue</h3><p>Maintenance & Repair</p></div>
+            <div class="card" onclick="openModal('lost-modal')"><h3>🔍 Lost & Found</h3><p>Report found items</p></div>
+            <div class="card" onclick="openModal('events-modal')"><h3>📅 Events</h3><p>Notice & Seminars</p></div>
+            <div class="card" style="grid-column: 1 / -1;" onclick="openModal('map-modal')"><h3>📍 Interactive Map</h3><p>Full University Layout</p></div>
+        </div>
+        
+        <center><button onclick="location.reload()" style="background:none; border:none; color:gray; cursor:pointer;">Logout</button></center>
+    </div>
+
+    <div id="canteen-modal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('canteen-modal')">&times;</span>
+            <h2>Campus Canteen Menu</h2>
+            <div class="item-row"><span>🍔 Chicken Burger - $6</span> <button onclick="addToCart('Burger', 6)">Add</button></div>
+            <div class="item-row"><span>🍟 French Fries - $4</span> <button onclick="addToCart('Fries', 4)">Add</button></div>
+            <div class="item-row"><span>🥤 Cold Coffee - $3</span> <button onclick="addToCart('Coffee', 3)">Add</button></div>
+            <div class="item-row"><span>🍕 Veg Pizza - $8</span> <button onclick="addToCart('Pizza', 8)">Add</button></div>
+        </div>
+    </div>
+
+    <div id="cart-modal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('cart-modal')">&times;</span>
+            <h2>Shopping Cart</h2>
+            <div id="cart-items"></div>
+            <div class="cart-footer">
+                <h3>Total: $<span id="cart-total">0</span></h3>
+                <button class="btn-main" onclick="alert('Proceeding to Payment Gateway...')">Pay Now</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="issue-modal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('issue-modal')">&times;</span>
+            <h2>Report Maintenance Issue</h2>
+            <textarea id="issue-text" placeholder="Describe the problem (e.g. Electrical leak in Hall A)" style="width:100%; height:100px; padding:10px; margin-bottom:10px;"></textarea>
+            <label>Upload Proof:</label>
+            <input type="file" accept="image/*">
+            <button class="btn-main" onclick="submitFeedback('Issue Reported')">Submit Report</button>
+        </div>
+    </div>
+
+    <div id="lost-modal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('lost-modal')">&times;</span>
+            <h2>Found Item Entry</h2>
+            <label>Item Photo:</label>
+            <input type="file" accept="image/*">
+            <input type="text" placeholder="Found at (Location)">
+            <input type="text" placeholder="Contact Person Name">
+            <button class="btn-main" onclick="submitFeedback('Item Registered')">Post Found Item</button>
+        </div>
+    </div>
+
+    <div id="events-modal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('events-modal')">&times;</span>
+            <h2>Notice Board & Events</h2>
+            <div class="item-row"><strong>Annual Tech Fest</strong> <span>Mar 15, 2026</span></div>
+            <div class="item-row"><strong>AI Seminar (Guest: Dr. Smith)</strong> <span>Tomorrow</span></div>
+            <div class="item-row"><strong>Notice:</strong> Library closes early today.</div>
+        </div>
+    </div>
+
+    <div id="map-modal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('map-modal')">&times;</span>
+            <h2>University Map Layout</h2>
+            <div class="map-placeholder">
+                [ COLLEGE CAMPUS MAP VIEW ]<br>
+                Main Block | Science Wing | Sports Area
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* --- JAVASCRIPT LOGIC --- */
+        let cart = [];
+
+        function handleLogin() {
+            const email = document.getElementById('email').value;
+            if(email.includes('@')) {
+                document.getElementById('login-page').classList.add('hidden');
+                document.getElementById('dashboard').classList.remove('hidden');
+            } else {
+                alert("Please enter a valid university email!");
+            }
+        }
+
+        function openModal(id) {
+            document.getElementById(id).classList.remove('hidden');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+
+        function addToCart(name, price) {
+            cart.push({name, price});
+            updateCart();
+            alert(name + " added to cart!");
+        }
+
+        function updateCart() {
+            const list = document.getElementById('cart-items');
+            const totalEl = document.getElementById('cart-total');
+            const countEl = document.getElementById('cart-count');
+            
+            list.innerHTML = "";
+            let total = 0;
+            
+            cart.forEach((item) => {
+                total += item.price;
+                list.innerHTML += `<div class="item-row"><span>${item.name}</span> <span>$${item.price}</span></div>`;
+            });
+            
+            totalEl.innerText = total;
+            countEl.innerText = cart.length;
+        }
+
+        function submitFeedback(msg) {
+            alert(msg + " successfully!");
+            location.reload(); // Returns to main page
+        }
+    </script>
+</body>
+</html>
